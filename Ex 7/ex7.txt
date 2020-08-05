@@ -1,0 +1,251 @@
+//Program:
+//Contents of CharStack.h file
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+typedef struct stack
+{
+	char exp;
+	struct stack * next;
+}node;
+
+
+char pop(node **top)
+{
+	char c;
+	node * ptr=*top;
+	if(ptr!=NULL)
+	{
+		*top=(*top)->next;
+		c=(ptr->exp);
+		ptr->next=NULL;
+		free(ptr);
+	}
+	return c;
+}
+char checktop(node * top)
+{
+    return (top->exp);
+}
+int precedence(node * top,char c)
+{
+    char op=(checktop(top));
+    if(c=='*'&&(op=='*'||op=='/'))
+        return 1;
+    else if(c=='/'&&(op=='*'||op=='/'))
+        return 1;
+    else if(c=='+'&&(op=='-'||op==c||op=='*'||op=='/'))
+        return 1;
+    else if(c=='-'&&(op=='+'||op==c||op=='*'||op=='/'))
+        return 1;
+    return 0;
+}
+int isop(char c)
+{
+    if(c=='+'||c=='-'||c=='*'||c=='/')
+        return 1;
+    return 0;
+}
+node * push(node * top,char c)
+{
+	node* ptr=(node *)malloc(sizeof(node));
+	if(ptr!=NULL)
+	{
+		ptr->exp=c;
+		ptr->next=top;
+		top=ptr;
+	}
+	return top;
+}
+int postfix(node * top,char str[],char post[])
+{
+    int k=0;
+    int f;
+    for(int i=0;str[i]!='\0';++i)
+    {
+        f=0;
+        if(str[i]>='0'&&str[i]<='9')
+        {
+            post[k]=str[i];
+            k++;
+        }
+        else if(str[i]==')')
+        {
+            char c;
+            do
+            {
+                if(top!=NULL)
+                {
+                    c=(pop(&top));
+                    if(c!='(')
+                    {
+                        post[k]=c;
+                        k++;
+                    }
+                }
+                else
+                {
+                    f=1;
+                    break;
+                }
+            }while(c!='(');
+        }
+        else if(isop(str[i]))
+        {
+            while(precedence(top,str[i]))
+            {
+                post[k]=(pop(&top));
+                k++;
+            }
+           top=push(top,str[i]);
+        }
+        else
+            top=push(top,str[i]);
+    }
+    if(top!=NULL)
+    {
+        f=1;
+    }
+	post[k]='\0';
+	if(f==1)
+        printf("Unbalanced Expression");
+    else
+        printf("Postfix form: %s",post);
+	return f;
+}
+
+//Contents of TreeStack.h file
+
+#include"CharStack.h"
+typedef struct mytree
+{
+	char exp;
+	struct mytree *left, *right;
+}tree;
+typedef struct TreeStack
+{
+    tree *node;
+    struct TreeStack * next;
+}ts;
+ts* pushTree(ts * top,tree * node)
+{
+    ts *newnode=malloc(sizeof(ts));
+    newnode->node=node;
+    newnode->next=top;
+    top=newnode;
+    return top;
+}
+tree * popTree(ts ** top)
+{
+    ts *temp=(*top);
+    tree *sub=temp->node;
+    (*top)=(*top)->next;
+    free(temp);
+    return sub;
+}
+void inorder(tree * root)
+{
+    if(root!=NULL)
+    {
+        inorder(root->left);
+        printf(" %c",root->exp);
+        inorder(root->right);
+    }
+}
+void preorder(tree * root)
+{
+    if(root!=NULL)
+    {
+        printf(" %c",root->exp);
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
+void postorder(tree * root)
+{
+    if(root!=NULL)
+    {
+        postorder(root->left);
+        postorder(root->right);
+        printf(" %c",root->exp);
+    }
+}
+//Contents of main.c file
+
+#include"TreeStack.h"
+int main()
+{
+    int ch;
+    do
+    {
+	char str1[50],str[50]="(", post[50];
+	int n;
+	node * Chartop=NULL;
+	ts *treetop=NULL;
+	tree *root;
+	printf("Enter the expression:\n");
+	scanf(" %[^\n]",str1);
+	strcat(str,str1);
+	strcat(str,")");
+	int f=postfix(Chartop,str,post);
+	if(f==0)
+	{
+        n=strlen(post);
+        for(int i=0;i<n;++i)
+        {
+            tree * tnode=malloc(sizeof(tree));
+            if(!isop(post[i]))
+            {
+                tnode->exp=post[i];
+                tnode->left=tnode->right=NULL;
+            }
+            else
+            {
+                tnode->exp=post[i];
+                tnode->right=popTree(&treetop);
+                tnode->left=popTree(&treetop);
+            }
+            treetop=pushTree(treetop,tnode);
+        }
+        root=popTree(&treetop);
+        printf("\nPREORDER: ");
+        preorder(root);
+        printf("\nINORDER: ");
+        inorder(root);
+        printf("\nPOSTORDER: ");
+        postorder(root);
+        printf("\n");
+	}
+	printf("\nDo you want to continue?(1-yes/0-No): ");
+    scanf(" %d",&ch);
+    }while(ch!=0);
+	return 0;
+}
+/*
+OUTPUT:
+Enter the expression:
+(2+5)*(3-6)/(7*8)
+Postfix form: 25+36-*78*/
+PREORDER:  / * + 2 5 - 3 6 * 7 8
+INORDER:  2 + 5 * 3 - 6 / 7 * 8
+POSTORDER:  2 5 + 3 6 - * 7 8 * /
+
+Do you want to continue?(1-yes/0-No): 1
+Enter the expression:
+7-(((3+2)*(6+1))/(5+6))
+Postfix form: 732+61+*56+/-
+PREORDER:  - 7 / * + 3 2 + 6 1 + 5 6
+INORDER:  7 - 3 + 2 * 6 + 1 / 5 + 6
+POSTORDER:  7 3 2 + 6 1 + * 5 6 + / -
+
+Do you want to continue?(1-yes/0-No): 1
+Enter the expression:
+((3+2)*(2+5))
+Postfix form: 32+25+*
+PREORDER:  * + 3 2 + 2 5
+INORDER:  3 + 2 * 2 + 5
+POSTORDER:  3 2 + 2 5 + *
+
+Do you want to continue?(1-yes/0-No): 0
+*/

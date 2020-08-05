@@ -1,0 +1,128 @@
+// /**********************CONTENTS OF FILE QUEUE.H*************************/
+struct Node
+{
+	int jno;
+	int time;
+	struct Node *next;
+}*front1=NULL,*rear1=NULL,*front2=NULL,*rear2=NULL;
+
+void enqueue(int q,int j,int t)
+{
+	struct Node *new;
+	new = (struct Node*)malloc(sizeof(struct Node));
+	new->jno=j;
+	new->time=t;
+	new->next=NULL;
+	if(q==1)
+	{
+		if(front1==NULL)
+			front1=rear1=new;
+		else
+		{
+			rear1->next=new;
+			rear1=new;
+		}
+	}
+	else
+	{
+		if(front2==NULL)
+			front2=rear2=new;
+		else
+		{
+			rear2->next=new;
+			rear2=new;
+		}
+	}
+}
+
+void display(int q)
+{
+	if(q==1)
+	{
+		if(front1==NULL)
+		printf("\nQueue is Empty!!!\n");
+		else
+		{
+			struct Node *temp=front1;
+			while(temp->next!=NULL)
+			{
+				printf("%d : %d\t",temp->jno,temp->time);
+				temp=temp->next;
+			}
+			printf("%d : %d\t",temp->jno,temp->time);
+		}
+	}
+	else
+	{
+		if(front2==NULL)
+		printf("\nQueue is Empty!!!\n");
+		else
+		{
+			struct Node *temp=front2;
+			while(temp->next!=NULL)
+			{
+				printf("%d : %d\t",temp->jno,temp->time);
+				temp=temp->next;
+			}
+			printf("%d : %d\t",temp->jno,temp->time);
+		}
+	}
+}
+
+
+//==========main==================
+
+#include<stdio.h>
+#include<stdlib.h>
+#include"queue.h"
+void main()
+{
+	int i,j,wt=0;
+	for(i=0;i<10;i++)
+	{
+		printf("\nEnter time for job no:%d   ",i+1);
+		scanf("%d",&j);
+		wt=wt+j;
+		enqueue(1,i+1,j);
+		enqueue(2,i+1,wt);
+		
+	}
+	printf("%\nQueue 1 \n");
+	display(1);	
+	printf("%\nQueue 2 \n");
+	display(2);	
+}
+
+
+
+
+//=================/*sample input/output
+//============================
+Enter time for job no:1   6
+
+Enter time for job no:2   5
+
+Enter time for job no:3   2
+
+Enter time for job no:4   3
+
+Enter time for job no:5   7
+
+Enter time for job no:6   3
+
+Enter time for job no:7   7
+
+Enter time for job no:8   2
+
+Enter time for job no:9   3
+
+Enter time for job no:10   7
+
+Queue 1
+1 : 6   2 : 5   3 : 2   4 : 3   5 : 7   6 : 3   7 : 7   8 : 2   9 : 3   10 : 7
+Queue 2
+1 : 6   2 : 11  3 : 13  4 : 16  5 : 23  6 : 26  7 : 33  8 : 35  9 : 38  10 : 45
+*/
+
+
+

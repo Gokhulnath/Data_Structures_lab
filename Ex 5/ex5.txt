@@ -1,0 +1,187 @@
+#include<stdio.h> 
+#include<stdlib.h> 
+#include<ctype.h> 
+#include<string.h> 
+#define SIZE 100 
+
+char stack[SIZE]; 
+int top = -1; 
+
+void push(char c); 
+char pop(); 
+int isoperator(char symbol); 
+int precedence(char symbol); 
+void InfixToPostfix(char infix_exp[], char postfix_exp[]); 
+
+void main() 
+{ 
+char infix[SIZE], postfix[SIZE]; 
+	float  a, b, result, pEval;
+	int i;
+	char ch;
+printf("\n\n Enter Infix expression : "); 
+gets(infix); 
+InfixToPostfix(infix,postfix);  
+printf("\n\n Postfix Expression: "); 
+puts(postfix); 
+for(i=0; postfix[i] != '\0'; i++)
+	{
+		ch = postfix[i];
+
+		if(isdigit(ch))
+		{
+			push(ch-'0');
+		}
+		else if(ch == '+' || ch == '-' || ch == '*' || ch == '/')
+		{
+			b = pop();
+			a = pop();
+			
+			switch(ch)
+			{
+				case '+': result = a+b;
+					  break;
+				case '-': result = a-b;
+					  break;
+				case '*': result = a*b;
+					  break;
+				case '/': result = a/b;
+					  break;
+			}
+			
+			push(result);
+		}		
+	
+	}
+
+	pEval = pop();
+	
+	printf("\n The postfix evaluation is: %f\n",pEval);
+	
+} 
+
+void InfixToPostfix(char infix_exp[], char postfix_exp[]) 
+{ 
+int i, j; 
+char item, x; 
+push('('); 
+strcat(infix_exp,")"); 
+i=0; 
+j=0; 
+item=infix_exp[i]; 
+while(item != '\0') 
+{ 
+if(item == '(') 
+{ 
+push(item); 
+} 
+else if( isdigit(item) || isalpha(item)) 
+{ 
+postfix_exp[j] = item; 
+j++; 
+} 
+else if(isoperator(item) == 1) 
+{ 
+x=pop(); 
+while(isoperator(x) == 1 && precedence(x)>= precedence(item)) 
+{ 
+postfix_exp[j] = x; 
+j++; 
+x = pop(); 
+} 
+push(x); 
+push(item); 
+} 
+else if(item == ')') 
+{ 
+x = pop(); 
+while(x != '(') 
+{ 
+postfix_exp[j] = x; 
+j++; 
+x = pop(); 
+} 
+} 
+else 
+{ 
+printf("\nUnbalanced infix Expression.\n"); 
+break; 
+} 
+i++; 
+item = infix_exp[i]; 
+}
+if(top > 0) 
+printf("\n Unbalanced  infix Expression."); 
+postfix_exp[j] = '\0'; 
+} 
+
+void push(char c) 
+{ 
+if(top >= SIZE-1) 
+printf("\n Stack Overflow."); 
+else 
+{ 
+top++; 
+stack[top] = c; 
+} 
+} 
+
+char pop() 
+{ 
+char c; 
+c='\0'; 
+if(top < 0) 
+printf("\n Stack Underflow."); 
+else 
+{ 
+c = stack[top]; 
+top--; 
+} 
+return c; 
+} 
+
+int isoperator(char symbol) 
+{ 
+if(symbol == '^' || symbol == '*' || symbol == '/' || symbol == '+' || symbol == '-')
+return 1; 
+else 
+return 0; 
+} 
+
+
+int precedence(char symbol) 
+{ 
+if(symbol == '^') 
+return(3); 
+else if(symbol == '/') 
+return(2); 
+else if(symbol == '*') 
+return(2); 
+else if(symbol == '+') 
+return(1); 
+else if(symbol == '-') 
+return(1); 
+else 
+return(0); 
+}
+
+/*
+Sample i/o:
+
+Enter Infix expression : (2+5)*(3-6)/(7*8)
+ Postfix Expression: 25+36-*78*/
+ The postfix evaluation is: 0.000000
+
+
+Enter Infix expression : 7-(((3+2)*(6+1))/(5+6)
+Unbalanced  infix Expression.
+ Postfix Expression: 732+61+*56+/
+ The postfix evaluation is: 3.000000
+
+
+ Enter Infix expression : (((3+2)*(2+5)
+ Unbalanced  infix Expression.
+ Postfix Expression: 32+25+*
+ The postfix evaluation is: 35.000000
+
+*/

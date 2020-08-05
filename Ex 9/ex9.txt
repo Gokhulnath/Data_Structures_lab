@@ -1,0 +1,453 @@
+/*
+•	Create AVL tree for maintaining English to multi-lingual dictionary for the following entries where the Key element is the English term.
+
+Algorithm	நெறிமுறை	कलन विधि
+Animation	அசைவூட்டம்	 एनीमेशन
+Bit	நுண்மி	बिट
+Browser	உலாவி	ब्राउज़र
+Clipboard	மறைப்பலகை	कर्तन पट्ट
+Compiler	தொகுப்பி	संकलक
+Digital	எண்மின்	डिजिटल
+Printer	அச்சுப்பொறி	छापनेवाला यंत्र
+Encoding	குறியாக்கம்	संकेतीकरण
+Gateway	நுழைவாயில்	प्रवेशद्वार
+Hardware	வன்பொருள்	 हार्डवेयर
+Internet	இணையம்	अंतराजाल
+Memory	நினைவகம்	याददाश्त
+Monitor	கணித்திரை	मॉनिटर
+Password	கடவுச்சொல்	 संकेत-शब्द
+
+•	Display the tree after inserting each element 
+•	Display the type of rotation if applicable for each insertion.
+•	Find the Tamil and Hindi meanings of the given English term
+
+Program:
+Contents of functions.h file  
+*/
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef struct avltree
+{
+	char eng[50],tamil[50],hindi[50];
+	int ht;
+	struct avltree * left,*right;
+}tree;
+int height(tree * p)
+{
+	if(p==NULL)
+		return -1;
+	else
+		return p->ht;
+}
+int max(tree * t1,tree * t2)
+{
+	if(height(t1)>height(t2))
+		return height(t1);
+	else
+		return height(t2);
+}
+void inorder(tree *t)
+{
+    if(t!=NULL)
+    {
+        inorder(t->left);
+        printf(" %s  \t%s  \t%s\n",t->eng,t->tamil,t->hindi);
+        inorder(t->right);
+    }
+}
+void meaning(tree * t,char eng[50])
+{
+	if(t)
+	{
+		if(strcmp(eng,t->eng)<0)
+			meaning(t->left,eng);
+		else if(strcmp(eng,t->eng)>0)
+			meaning(t->right,eng);
+		else
+			{
+				printf("\nWord: %s",t->eng);
+				printf("\nTamil: %s",t->tamil);
+				printf("\nHindi: %s\n",t->hindi);
+			}
+	}
+}
+tree * singlerotateleft(tree * k2)
+{
+	printf("\nPerforming Single Rotate with left.....");
+	tree * k1;
+	k1=k2->left;
+	k2->left=k1->right;
+	k1->right=k2;
+	k2->ht=max(k2->left,k2->right)+1;
+	k1->ht=max(k1->left,k2)+1;
+	return k1;
+}
+tree * singlerotateright(tree * k2)
+{
+	printf("\nPerforming Single Rotate with right.....");
+	tree * k1;
+	k1=k2->right;
+	k2->right=k1->left;
+	k1->left=k2;
+	k2->ht=max(k2->left,k2->right)+1;
+	k1->ht=max(k1->left,k2)+1;
+	return k1;
+}
+tree * doublelerotateleft(tree * k3)
+{
+	printf("\nPerforming Double Rotate with left.....");
+	k3->left=singlerotateright(k3->left);
+	return singlerotateleft(k3);
+}
+tree * doublerotateright(tree * k3)
+{
+	printf("\nPerforming Double Rotate with right.....");
+	k3->right=singlerotateleft(k3->right);
+	return singlerotateright(k3);
+}
+tree * insert(tree * t,char eng[50],char tamil[50],char hindi[50])
+{
+	if(t==NULL)
+	{
+		t=malloc(sizeof(tree));
+		if(t==NULL)
+			printf("\nNULL");
+		strcpy(t->eng,eng);
+		strcpy(t->tamil,tamil);
+		strcpy(t->hindi,hindi);
+		t->left=t->right=NULL;
+		t->ht=0;
+	}
+	else if(strcmp(eng,t->eng)<0)
+	{
+		t->left=insert(t->left,eng,tamil,hindi);
+		if(height(t->left)-height(t->right)==2)
+		{
+			if(strcmp(eng,t->left->eng)<0)
+				t=singlerotateleft(t);
+			else
+				t=doublelerotateleft(t);
+		}
+	}
+	else if(strcmp(eng,t->eng)>0)
+	{
+		t->right=insert(t->right,eng,tamil,hindi);
+		if(height(t->left)-height(t->right)==-2)
+		{
+			if(strcmp(eng,t->right->eng)>0)
+				t=singlerotateright(t);
+			else
+				t=doublerotateright(t);
+		}
+	}
+	t->ht=max(t->left,t->right)+1;
+	return t;
+}
+
+//Contents of avl.c file
+
+#include"functions.h"
+int main()
+{
+	tree * root=NULL;
+	char str[50],m1[50],m2[50];
+	printf("\n\nEnter English word: ");
+	scanf(" %[^\n]",str);
+	while(strcmp(str,"0"))
+	{
+		printf("\nEnter its Tamil meaning: ");
+		scanf(" %[^\n]",m1);
+		printf("\nEnter its Hindi meaning: ");
+		scanf(" %[^\n]",m2);
+		root=insert(root,str,m1,m2);
+		printf("\n\nEnglish\t\tTamil\t\tHindi\n");
+		inorder(root);
+		printf("\n\nEnter English word: ");
+		scanf(" %[^\n]",str);
+	}
+	strcpy(str,"");
+	while(strcmp(str,"0"))
+	{
+		printf("\nFind meaning of: ");
+		scanf(" %[^\n]",str);
+		meaning(root,str);
+	}
+	return 0;
+}
+/*
+Output:
+gml16:ex9 cseb16$ gcc avl.c -o avl
+gml16:ex9 cseb16$ ./avl
+
+Enter English word: Algorithm
+Enter its Tamil meaning: நெறிமுறை
+Enter its Hindi meaning: कलनविधि
+
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+
+
+Enter English word: Animation
+Enter its Tamil meaning: அசைவூட்டம்
+Enter its Hindi meaning:  एनीमेशन
+
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+
+
+Enter English word: Bit
+Enter its Tamil meaning: நுண்மி
+Enter its Hindi meaning: बिट
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+
+
+Enter English word: Browser
+Enter its Tamil meaning: உலாவி
+Enter its Hindi meaning: ब्राउज़र
+
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+
+
+Enter English word: Clipboard
+Enter its Tamil meaning: மறைப்பலகை
+Enter its Hindi meaning: कर्तनपट्ट
+
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+
+
+Enter English word: Compiler
+Enter its Tamil meaning: தொகுப்பி
+Enter its Hindi meaning: संकलक
+
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit		  	நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+
+
+Enter English word: Digital
+Enter its Tamil meaning: எண்மின்
+Enter its Hindi meaning: डिजिटल
+
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+
+
+Enter English word: Printer
+Enter its Tamil meaning: அச்சுப்பொறி
+Enter its Hindi meaning: छापनेवालायंत्र
+
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit 		 	நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital 	 	எண்மின்		डिजिटल
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+
+Enter English word: Encoding
+Enter its Tamil meaning: குறியாக்கம்
+Enter its Hindi meaning: संकेतीकरण
+
+Performing Double Rotate with right.....
+Performing Single Rotate with left.....
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+Enter English word: Gateway
+Enter its Tamil meaning: நுழைவாயில்
+Enter its Hindi meaning: प्रवेशद्वार
+
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Gateway  	நுழைவாயில்	प्रवेशद्वार
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+
+Enter English word: Hardware
+Enter its Tamil meaning: வன்பொருள்
+Enter its Hindi meaning:  हार्डवेयर
+
+Performing Double Rotate with left.....
+Performing Single Rotate with right.....
+Performing Single Rotate with left.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Gateway  	நுழைவாயில்	प्रवेशद्वार
+ Hardware  	வன்பொருள்	 हार्डवेयर
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+
+Enter English word: Internet
+Enter its Tamil meaning: இணையம்
+Enter its Hindi meaning: अंतराजाल
+
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Gateway  	நுழைவாயில்	प्रवेशद्वार
+ Hardware  	வன்பொருள்	 हार्डवेयर
+ Internet  	இணையம்	अंतराजाल
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+
+Enter English word: Memory
+Enter its Tamil meaning: நினைவகம்
+Enter its Hindi meaning: याददाश्त
+
+Performing Double Rotate with left.....
+Performing Single Rotate with right.....
+Performing Single Rotate with left.....
+
+English		Tamil		Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Gateway  	நுழைவாயில்	प्रवेशद्वार
+ Hardware  	வன்பொருள்	 हार्डवेयर
+ Internet  	இணையம்	अंतराजाल
+ Memory  	நினைவகம்	याददाश्त
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+
+Enter English word: Monitor
+Enter its Tamil meaning: கணித்திரை
+Enter its Hindi meaning: मॉनिटर
+
+Performing Single Rotate with right.....
+
+English		Tamil		Hindi
+Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Gateway  	நுழைவாயில்	प्रवेशद्वार
+ Hardware  	வன்பொருள்	 हार्डवेयर
+ Internet  	இணையம்	अंतराजाल
+ Memory  	நினைவகம்	याददाश्त
+ Monitor  	கணித்திரை	मॉनिटर
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+Enter English word: Password
+Enter its Tamil meaning: கடவுச்சொல்
+Enter its Hindi meaning:  संकेत-शब्द
+
+Performing Double Rotate with left.....
+Performing Single Rotate with right.....
+Performing Single Rotate with left.....
+
+English		Tamil			Hindi
+ Algorithm  	நெறிமுறை	कलनविधि
+ Animation  	அசைவூட்டம்	 एनीमेशन
+ Bit  		நுண்மி		बिट
+ Browser  	உலாவி		ब्राउज़र
+ Clipboard  	மறைப்பலகை	कर्तनपट्ट
+ Compiler  	தொகுப்பி	संकलक
+ Digital  		எண்மின்		डिजिटल
+ Encoding  	குறியாக்கம்	संकेतीकरण
+ Gateway  	நுழைவாயில்	प्रवेशद्वार
+ Hardware  	வன்பொருள்	 हार्डवेयर
+ Internet  	இணையம்	अंतराजाल
+ Memory  	நினைவகம்	याददाश्त
+ Monitor  	கணித்திரை	मॉनिटर
+ Password  	கடவுச்சொல்	 संकेत-शब्द
+ Printer  	அச்சுப்பொறி	छापनेवालायंत्र
+
+
+Enter English word: 0
+
+Find meaning of: Encoding
+Word: Encoding
+Tamil: குறியாக்கம்
+Hindi: संकेतीकरण
+
+Find meaning of: Internet
+Word: Internet
+Tamil: இணையம்
+Hindi: अंतराजाल
+
+Find meaning of: 0
+
+*/
